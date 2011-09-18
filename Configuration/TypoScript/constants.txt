@@ -1,0 +1,14 @@
+plugin.tx_mnlinkedin {
+	view {
+		# cat=plugin.tx_mnlinkedin/file; type=string; label=Path to template root (FE)
+		templateRootPath = EXT:mn_linkedin/Resources/Private/Templates/
+		# cat=plugin.tx_mnlinkedin/file; type=string; label=Path to template partials (FE)
+		partialRootPath = EXT:mn_linkedin/Resources/Private/Partials/
+		# cat=plugin.tx_mnlinkedin/file; type=string; label=Path to template layouts (FE)
+		layoutRootPath = EXT:mn_linkedin/Resources/Private/Layouts/
+	}
+	persistence {
+		# cat=plugin.tx_mnlinkedin//a; type=int+; label=Default storage PID
+		storagePid = 
+	}
+}

@@ -1,0 +1,71 @@
+<f:layout name="Default" />
+
+This Template is responsible for displaying a single view for a domain object
+
+If you modify this template, do not forget to change the overwrite settings
+in /Configuration/ExtensionBuilder/settings.yaml:
+  Resources:
+    Private:
+      Templates:
+        Show.html: keep
+
+Otherwise your changes will be overwritten the next time you save the extension in the extension builder
+
+<f:section name="main">
+
+<!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>-->
+
+<script type="text/javascript">
+ 
+    function loadData() {
+        loadProfileData();
+        loadConnectionsData();
+    }
+ 
+    function loadProfileData() {
+      IN.API.Profile("me")
+        .fields(["id", "firstName", "lastName", "pictureUrl", "headline", "publicProfileUrl"])
+        .result(function(result) {
+          profile = result.values[0];
+          if(profile.pictureUrl != "") {
+            profile.pictureUrl = "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
+          } 
+          profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
+          profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";     
+          profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
+          profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
+          profHTML += "<span class=myheadline>" + profile.headline + "</span>";
+          jQuery("#linkedin_profile").html(profHTML);
+        });
+    }
+    
+    function loadConnectionsData() {
+      IN.API.Connections("me")
+        .fields(["pictureUrl","publicProfileUrl"])
+        .params({"count":30})
+        .result(function(result) {
+          profHTML = "";
+          for (var index in result.values) {
+              profile = result.values[index]
+              if (profile.pictureUrl) {
+                  profHTML += "<p><a href=\"" + profile.publicProfileUrl + "\">";
+                  profHTML += "<img class=img_border height=30 align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";  
+              }   
+          }
+          jQuery("#linkedin_connections").html(profHTML);
+        });
+    }
+ 
+</script>
+
+<f:for each="{linkedinApplications}" as="linkedinApplication">
+    <script type="text/javascript" src="http://platform.linkedin.com/in.js">
+        api_key: {linkedinApplication.appKey}
+    </script>
+</f:for>
+
+<div id="linkedin_profile"></div>
+<div id="linkedin_connections"></div>
+<script type="IN/Login" data-onAuth="loadData"></script>
+
+</f:section>

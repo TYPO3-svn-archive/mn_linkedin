@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>module</type>
+		<description>Language labels for the Linkedin extension in the FRONTEND</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tx_mnlinkedin_domain_model_linkedinapplication">LinkedinApplication</label>
+			<label index="tx_mnlinkedin_domain_model_linkedinapplication.app_key">Apikey for linkedin application</label>
+		</languageKey>
+	</data>
+</T3locallang>

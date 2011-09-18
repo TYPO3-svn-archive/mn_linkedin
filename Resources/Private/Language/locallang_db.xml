@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'mn_linkedin'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tx_mnlinkedin_domain_model_linkedinapplication">Linkedin Application</label>
+			<label index="tx_mnlinkedin_domain_model_linkedinapplication.app_key">App Key</label>
+		</languageKey>
+	</data>
+</T3locallang>

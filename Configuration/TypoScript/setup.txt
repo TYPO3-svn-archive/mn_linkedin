@@ -1,0 +1,30 @@
+plugin.tx_mnlinkedin {
+	view {
+		templateRootPath = {$plugin.tx_mnlinkedin.view.templateRootPath}
+		partialRootPath = {$plugin.tx_mnlinkedin.view.partialRootPath}
+		layoutRootPath = {$plugin.tx_mnlinkedin.view.layoutRootPath}
+	}
+	persistence {
+		storagePid = {$plugin.tx_mnlinkedin.persistence.storagePid}
+	}
+}
+
+plugin.tx_mnlinkedin._CSS_DEFAULT_STYLE (
+	input.f3-form-error {
+		background-color:#FF9F9F;
+		border: 1px #FF0000 solid;
+	}
+
+	.tx-mn-linkedin table {
+		border-collapse:separate;
+		border-spacing:10px;
+	}
+
+	.tx-mn-linkedin table th {
+		font-weight:bold;
+	}
+
+	.tx-mn-linkedin table td {
+		vertical-align:top;
+	}
+)
