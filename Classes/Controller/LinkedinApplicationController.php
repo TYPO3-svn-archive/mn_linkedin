@@ -57,7 +57,7 @@ class Tx_MnLinkedin_Controller_LinkedinApplicationController extends Tx_Extbase_
 	 * @return void
 	 */
 	public function showAction() {
-		$linkedinApplications = $this->linkedinApplicationRepository->findAll();
+    $linkedinApplications = $this->linkedinApplicationRepository->findAll();
 		$this->view->assign('linkedinApplications', $linkedinApplications);
 	}
 

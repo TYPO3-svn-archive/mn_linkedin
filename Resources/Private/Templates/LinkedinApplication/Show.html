@@ -20,6 +20,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
     function loadData() {
         loadProfileData();
         loadConnectionsData();
+        loadStreamData();
     }
  
     function loadProfileData() {
@@ -55,6 +56,33 @@ Otherwise your changes will be overwritten the next time you save the extension 
           jQuery("#linkedin_connections").html(profHTML);
         });
     }
+    
+    function loadStreamData() {
+        // we pass field selectors as a single parameter (array of strings)
+        IN.API.NetworkUpdates()
+        .params({type:"SHAR"})
+        .result(function(result) {
+            var streamHTML = "";
+            for (var update in result.values) {
+                var thisupdate = result.values[update]
+         
+                // Build each individual stream update item
+                person = thisupdate.updateContent.person
+                var thisHTML = "<div class=streamitem>";
+             
+                // Person's picture,  linked name, and status
+                thisHTML += "<div class=updateperson>" ;
+                thisHTML += "<img class=img_border align=\"left\" height=\"50\" src=\"" + person.pictureUrl + "\"></a>";
+                thisHTML += "<a href=\"" + person.publicProfileUrl + "\">";
+                thisHTML += "<span class=updater>" + person.firstName + " " + person.lastName + "</a></span>"; 
+                thisHTML += "<p class=update>" + person.currentShare.comment + "</p></div></div>";
+ 
+               // Slap this onto the HTML we're building
+               streamHTML += thisHTML;
+            }
+            jQuery("#stream").html(streamHTML);
+        });
+    }
  
 </script>
 
@@ -66,6 +94,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
 
 <div id="linkedin_profile"></div>
 <div id="linkedin_connections"></div>
+<div id="stream"></div>
 <script type="IN/Login" data-onAuth="loadData"></script>
 
 </f:section>
