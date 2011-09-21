@@ -13,7 +13,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
 
 <f:section name="main">
 
-<!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>-->
+<link media="all" type="text/css" rel="stylesheet" href="typo3conf/ext/mn_linkedin/Resources/Public/Css/mn_linkedin.css" />
 
 <script type="text/javascript">
  
@@ -28,9 +28,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
         .fields(["id", "firstName", "lastName", "pictureUrl", "headline", "publicProfileUrl"])
         .result(function(result) {
           profile = result.values[0];
-          if(profile.pictureUrl != "") {
-            profile.pictureUrl = "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
-          } 
+          profile.pictureUrl = profile.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
           profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
           profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";     
           profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
@@ -83,18 +81,49 @@ Otherwise your changes will be overwritten the next time you save the extension 
             jQuery("#stream").html(streamHTML);
         });
     }
+    
+    function searchLinkedinPeople(searchString) {
+        IN.API.PeopleSearch()
+         .fields("firstName", "lastName", "distance", "publicProfileUrl", "pictureUrl")
+         .params({"keywords": searchString, "count": 10, "sort": "distance"})
+         .result(function(result) {
+            profHTML = "<h4>People search results for keyword '" + searchString + "':</h4>";
+            for (var index in result.people.values) {
+                profile = result.people.values[index]
+                profile.pictureUrl = profile.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
+                if (profile.pictureUrl) {
+                    profHTML += "<p><a href=\"" + profile.publicProfileUrl + "\">";
+                    profHTML += "<img class=img_border height=30 align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";
+                    profHTML += "<p>" + profile.firstName + " " + profile.lastName + " (" + profile.distance + ")</p>"; 
+                }
+            }  
+            jQuery("#linkedin_search").html(profHTML);
+        });  
+    }
+    
+    jQuery(document).ready(function() {
+        jQuery("#search_box_button").click(function() {
+            searchLinkedinPeople(jQuery("#search_box").val());
+        });
+    });
  
 </script>
 
 <f:for each="{linkedinApplications}" as="linkedinApplication">
     <script type="text/javascript" src="http://platform.linkedin.com/in.js">
         api_key: {linkedinApplication.appKey}
+        authorize: true
     </script>
 </f:for>
 
 <div id="linkedin_profile"></div>
 <div id="linkedin_connections"></div>
 <div id="stream"></div>
+<div id="linkedin_search_form">
+  <input type="text" id="search_box" />
+  <input type="button" id="search_box_button" value="Search" />
+</div>
+<div id="linkedin_search"></div>
 <script type="IN/Login" data-onAuth="loadData"></script>
 
 </f:section>
