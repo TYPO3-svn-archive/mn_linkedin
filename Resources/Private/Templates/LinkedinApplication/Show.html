@@ -47,6 +47,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
           profHTML = "";
           for (var index in result.values) {
               profile = result.values[index]
+              profile.pictureUrl = profile.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
               if (profile.pictureUrl) {
                   profHTML += "<p><a href=\"" + profile.publicProfileUrl + "\">";
                   profHTML += "<img class=img_border height=30 align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";  
@@ -119,7 +120,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
     });
     
     jQuery("#post_network_update").live("click", function() {
-        var message = jQuery("network_update_message")
+        var message = jQuery("#network_update_message").val();
         if(message != "") {
             sendNetworkUpdate(message);
         }
