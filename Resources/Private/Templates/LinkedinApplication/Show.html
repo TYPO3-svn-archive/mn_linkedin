@@ -34,6 +34,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
           profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
           profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
           profHTML += "<span class=myheadline>" + profile.headline + "</span>";
+          profHTML += "<div ><input type=\"text\" id=\"network_update_message\" /><input type=\"button\" id=\"post_network_update\" class=\"updatebutton ui-corner-all\" value=\"Post Network Update\"></div>"
           jQuery("#linkedin_profile").html(profHTML);
         });
     }
@@ -56,7 +57,6 @@ Otherwise your changes will be overwritten the next time you save the extension 
     }
     
     function loadStreamData() {
-        // we pass field selectors as a single parameter (array of strings)
         IN.API.NetworkUpdates()
         .params({type:"SHAR"})
         .result(function(result) {
@@ -101,10 +101,31 @@ Otherwise your changes will be overwritten the next time you save the extension 
         });  
     }
     
+    function sendNetworkUpdate(message) {
+        updateURL = "/people/~/person-activities";
+        IN.API.Raw(updateURL)
+          .method("POST")
+          .body('{"contentType":"linkedin-html","title": "' + message + '","body": "' + message + '"}')
+          .result(function(result) {
+            alert ("Updated!");
+          })
+          .error( function(error) { alert ("Something went wrong!"); })
+    }
+    
     jQuery(document).ready(function() {
         jQuery("#search_box_button").click(function() {
             searchLinkedinPeople(jQuery("#search_box").val());
         });
+    });
+    
+    jQuery("#post_network_update").live("click", function() {
+        var message = jQuery("network_update_message")
+        if(message != "") {
+            sendNetworkUpdate(message);
+        }
+        else {
+            alert("Message must be entered to send it!");
+        }                   
     });
  
 </script>
