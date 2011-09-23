@@ -17,12 +17,14 @@ Otherwise your changes will be overwritten the next time you save the extension 
 
 <script type="text/javascript">
  
+    //Init function
     function loadData() {
         loadProfileData();
         loadConnectionsData();
-        loadStreamData();
+        loadLikeData();
     }
  
+    //Load your own profile data
     function loadProfileData() {
       IN.API.Profile("me")
         .fields(["id", "firstName", "lastName", "pictureUrl", "headline", "publicProfileUrl"])
@@ -34,55 +36,93 @@ Otherwise your changes will be overwritten the next time you save the extension 
           profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
           profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
           profHTML += "<span class=myheadline>" + profile.headline + "</span>";
-          profHTML += "<div ><input type=\"text\" id=\"network_update_message\" /><input type=\"button\" id=\"post_network_update\" class=\"updatebutton ui-corner-all\" value=\"Post Network Update\"></div>"
+          profHTML += "<div><input type=\"text\" id=\"network_update_message\" /><input type=\"button\" id=\"post_network_update\" class=\"updatebutton ui-corner-all\" value=\"Post Network Update\"></div>"
           jQuery("#linkedin_profile").html(profHTML);
         });
     }
     
+    //Load connections
     function loadConnectionsData() {
-      IN.API.Connections("me")
-        .fields(["pictureUrl","publicProfileUrl"])
-        .params({"count":30})
-        .result(function(result) {
-          profHTML = "";
-          for (var index in result.values) {
-              profile = result.values[index]
-              profile.pictureUrl = profile.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
-              if (profile.pictureUrl) {
-                  profHTML += "<p><a href=\"" + profile.publicProfileUrl + "\">";
-                  profHTML += "<img class=img_border height=30 align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";  
-              }   
-          }
-          jQuery("#linkedin_connections").html(profHTML);
+        IN.API.Connections("me")
+        .fields(["pictureUrl", "publicProfileUrl", "id"])
+        .params({ "count": 30 })
+        .result(function (result) {
+            profHTML = "";
+            for (var index in result.values) {
+                profile = result.values[index];
+                profile.pictureUrl = profile.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
+                if (profile.pictureUrl) {
+                    profHTML += "<p><a href=\"" + profile.publicProfileUrl + "\">";
+                    profHTML += "<img class=img_border height=30 align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";
+                    profHTML += "<input type=\"hidden\" class=\"send_connection_message_id\" value=\"" + profile.id + "\" /><input type=\"text\" class=\"send_connection_message_text\" /><input type=\"button\" class=\"send_connection_message\" class=\"updatebutton ui-corner-all\" value=\"Send message\"></p>"
+                }
+            }
+            jQuery("#linkedin_connections").html(profHTML);
         });
     }
-    
-    function loadStreamData() {
+
+    //Load stream data with like button functionality
+    function loadLikeData() {
+        // we pass field selectors as a single parameter (array of strings)
         IN.API.NetworkUpdates()
-        .params({type:"SHAR"})
-        .result(function(result) {
+        .params({ type: "SHAR", "count": "10" })
+        .result(function (result) {
             var streamHTML = "";
             for (var update in result.values) {
                 var thisupdate = result.values[update]
-         
+
                 // Build each individual stream update item
                 person = thisupdate.updateContent.person
+                if (person.id === "private") {
+                    continue;
+                }
                 var thisHTML = "<div class=streamitem>";
-             
+
                 // Person's picture,  linked name, and status
-                thisHTML += "<div class=updateperson>" ;
+                person.pictureUrl = person.pictureUrl || "http://static01.linkedin.com/scds/common/u/img/icon/icon_no_photo_no_border_offset_100x100.png";
+                thisHTML += "<div class=updateperson>";
                 thisHTML += "<img class=img_border align=\"left\" height=\"50\" src=\"" + person.pictureUrl + "\"></a>";
                 thisHTML += "<a href=\"" + person.publicProfileUrl + "\">";
-                thisHTML += "<span class=updater>" + person.firstName + " " + person.lastName + "</a></span>"; 
+                thisHTML += "<span class=updater>" + person.firstName + " " + person.lastName + "</a></span>";
                 thisHTML += "<p class=update>" + person.currentShare.comment + "</p></div></div>";
- 
-               // Slap this onto the HTML we're building
-               streamHTML += thisHTML;
+                if (!thisupdate.isLiked) {
+                    thisHTML += "<div id=button><button class=\"likebutton ui-corner-all\" id=\"" +
+                                    thisupdate.updateKey + "\">Like</button></div>"
+                } else {
+                    thisHTML += "<div id=button><button class=\"unlikebutton ui-corner-all\" id=\"" +
+                                    thisupdate.updateKey + "\">Unlike</button></div>"
+                }
+
+                // Slap this onto the HTML we're building
+                streamHTML += thisHTML;
             }
             jQuery("#stream").html(streamHTML);
         });
+
+        jQuery(".likebutton").live("click", function () {
+            likeURL = "/people/~/network/updates/key=" + jQuery(this).attr("id") + "/is-liked"
+            IN.API.Raw(likeURL)
+            .method("PUT")
+            .body("true")
+            .result(function (result) {
+                alert("Liked");
+                loadData();
+            })
+        });
+
+        jQuery(".unlikebutton").live("click", function () {
+            likeURL = "/people/~/network/updates/key=" + jQuery(this).attr("id") + "/is-liked"
+            IN.API.Raw(likeURL)
+            .method("PUT")
+            .body("false")
+            .result(function (result) {
+                alert("Unliked");
+                loadData();
+            })
+        });
     }
     
+    //Search function for connections
     function searchLinkedinPeople(searchString) {
         IN.API.PeopleSearch()
          .fields("firstName", "lastName", "distance", "publicProfileUrl", "pictureUrl")
@@ -102,6 +142,7 @@ Otherwise your changes will be overwritten the next time you save the extension 
         });  
     }
     
+    //Update your stream with a message
     function sendNetworkUpdate(message) {
         updateURL = "/people/~/person-activities";
         IN.API.Raw(updateURL)
@@ -113,12 +154,34 @@ Otherwise your changes will be overwritten the next time you save the extension 
           .error( function(error) { alert ("Something went wrong!"); })
     }
     
+    //Send a message to a connection
+    function sendMessage(id, message) {
+        var BODY = {
+           "recipients": {
+              "values": [{
+                "person": {
+                   "_path": "/people/" + id,
+                }
+              }]
+            },
+          "subject": "Message",
+          "body": message
+        }
+        IN.API.Raw("/people/~/mailbox")
+              .method("POST")
+              .body(JSON.stringify(BODY))
+              .result(function(result) {alert ("Message sent") })
+              .error(function error(e) { alert ("No dice") });
+    }
+
+    //Searchbox event
     jQuery(document).ready(function() {
         jQuery("#search_box_button").click(function() {
             searchLinkedinPeople(jQuery("#search_box").val());
         });
     });
     
+    //On network update
     jQuery("#post_network_update").live("click", function() {
         var message = jQuery("#network_update_message").val();
         if(message != "") {
@@ -128,7 +191,20 @@ Otherwise your changes will be overwritten the next time you save the extension 
             alert("Message must be entered to send it!");
         }                   
     });
- 
+
+    //Send message to connection
+    jQuery(".send_connection_message").live("click", function () {
+        var inputElement = jQuery(this).prev();
+        var message = inputElement.val();
+        var id = inputElement.prev().val();
+        if (message != "" && id != "") {
+            sendMessage(id, message);
+        }
+        else {
+            alert("Message must be entered to send it!" + message);
+        }
+    });
+
 </script>
 
 <f:for each="{linkedinApplications}" as="linkedinApplication">
